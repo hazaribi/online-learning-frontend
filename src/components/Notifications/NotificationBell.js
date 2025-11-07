@@ -17,15 +17,19 @@ const NotificationBell = () => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) return;
+      
       const response = await axios.get('/api/notifications', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      const notifs = response.data.notifications;
+      const notifs = response.data.notifications || [];
       setNotifications(notifs);
       setUnreadCount(notifs.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
@@ -72,14 +76,14 @@ const NotificationBell = () => {
         </Box>
         <Divider />
         
-        {notifications.length === 0 ? (
+        {(!notifications || notifications.length === 0) ? (
           <MenuItem>
             <Typography variant="body2" color="text.secondary">
               No notifications
             </Typography>
           </MenuItem>
         ) : (
-          notifications.slice(0, 5).map((notification) => (
+          (notifications || []).slice(0, 5).map((notification) => (
             <MenuItem
               key={notification.id}
               onClick={() => {
