@@ -1,0 +1,116 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  IconButton, Badge, Menu, MenuItem, Typography, Box, Divider 
+} from '@mui/material';
+import { Notifications, NotificationsNone } from '@mui/icons-material';
+import axios from 'axios';
+
+const NotificationBell = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const notifs = response.data.notifications;
+      setNotifications(notifs);
+      setUnreadCount(notifs.filter(n => !n.read).length);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`/api/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  return (
+    <>
+      <IconButton color="inherit" onClick={handleClick}>
+        <Badge badgeContent={unreadCount} color="error">
+          {unreadCount > 0 ? <Notifications /> : <NotificationsNone />}
+        </Badge>
+      </IconButton>
+      
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        PaperProps={{ sx: { width: 320, maxHeight: 400 } }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6">Notifications</Typography>
+        </Box>
+        <Divider />
+        
+        {notifications.length === 0 ? (
+          <MenuItem>
+            <Typography variant="body2" color="text.secondary">
+              No notifications
+            </Typography>
+          </MenuItem>
+        ) : (
+          notifications.slice(0, 5).map((notification) => (
+            <MenuItem
+              key={notification.id}
+              onClick={() => {
+                if (!notification.read) {
+                  markAsRead(notification.id);
+                }
+                handleClose();
+              }}
+              sx={{ 
+                backgroundColor: notification.read ? 'transparent' : 'action.hover',
+                whiteSpace: 'normal',
+                py: 1
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" fontWeight={notification.read ? 'normal' : 'bold'}>
+                  {notification.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {notification.message}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(notification.created_at).toLocaleDateString()}
+                </Typography>
+              </Box>
+            </MenuItem>
+          ))
+        )}
+      </Menu>
+    </>
+  );
+};
+
+export default NotificationBell;
