@@ -20,6 +20,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth API
 export const authAPI = {
   signup: (userData) => api.post(`${API_PREFIX}/auth/signup`, userData),

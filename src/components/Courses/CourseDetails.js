@@ -22,9 +22,9 @@ const CourseDetails = () => {
 
   useEffect(() => {
     fetchCourseData();
-  }, [id, fetchCourseData]);
+  }, [id]);
 
-  const fetchCourseData = async () => {
+  const fetchCourseData = React.useCallback(async () => {
     try {
       const [courseRes, lessonsRes] = await Promise.all([
         coursesAPI.getById(id),
@@ -49,7 +49,7 @@ const CourseDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const handleLessonSelect = (lesson) => {
     if (enrolled || lesson.is_free) {
@@ -65,18 +65,49 @@ const CourseDetails = () => {
 
   const handleFreeEnrollment = async () => {
     try {
-      await enrollmentAPI.enroll(id);
+      console.log('Attempting to enroll in course:', id);
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await enrollmentAPI.enroll(id);
+      console.log('Enrollment response:', response);
       setEnrolled(true);
+      alert('Successfully enrolled in the course!');
     } catch (error) {
       console.error('Enrollment failed:', error);
+      alert('Enrollment failed. Please try again.');
     }
   };
 
-  if (loading) return <Typography>Loading...</Typography>;
-  if (!course) return <Typography>Course not found</Typography>;
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+      <Typography variant="h6">Loading course details...</Typography>
+    </Box>
+  );
+  
+  if (!course) return (
+    <Box sx={{ textAlign: 'center', py: 8 }}>
+      <Typography variant="h5" gutterBottom>Course not found</Typography>
+      <Button variant="contained" onClick={() => navigate('/courses')}>Browse Courses</Button>
+    </Box>
+  );
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumb Navigation */}
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Button 
+          variant="text" 
+          onClick={() => navigate('/courses')}
+          sx={{ textTransform: 'none' }}
+        >
+          ← Back to Courses
+        </Button>
+        <Typography variant="body2" color="text.secondary">/ {course.title}</Typography>
+      </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           {currentView === 'overview' && (

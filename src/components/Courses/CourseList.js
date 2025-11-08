@@ -100,6 +100,18 @@ const CourseList = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Breadcrumb Navigation */}
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Button 
+          variant="text" 
+          onClick={() => navigate('/')}
+          sx={{ textTransform: 'none' }}
+        >
+          ← Home
+        </Button>
+        <Typography variant="body2" color="text.secondary">/ Courses</Typography>
+      </Box>
+      
       {/* Header Section */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
