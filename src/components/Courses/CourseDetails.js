@@ -5,10 +5,11 @@ import {
   ListItemText, Button, Chip, Alert 
 } from '@mui/material';
 import { PlayCircleOutline, Quiz, Person } from '@mui/icons-material';
-import { coursesAPI, lessonsAPI, enrollmentAPI } from '../../services/api';
+import { coursesAPI, lessonsAPI, enrollmentAPI, progressAPI } from '../../services/api';
 import PaymentForm from '../Payment/PaymentForm';
 import VideoPlayer from '../Video/VideoPlayer';
 import QuizComponent from '../Quiz/QuizComponent';
+import QuizAccessButton from '../Quiz/QuizAccessButton';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -71,6 +72,18 @@ const CourseDetails = () => {
   const handlePaymentSuccess = () => {
     setEnrolled(true);
     setCurrentView('overview');
+  };
+
+  const handleVideoProgress = async (progressData) => {
+    try {
+      await progressAPI.update(progressData);
+      // Refresh course data to update progress
+      if (progressData.completed) {
+        fetchCourseData();
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error);
+    }
   };
 
   const handleFreeEnrollment = async () => {
@@ -159,14 +172,7 @@ const CourseDetails = () => {
                 </List>
 
                 {enrolled && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<Quiz />}
-                    onClick={() => setCurrentView('quiz')}
-                    sx={{ mt: 2 }}
-                  >
-                    Take Quiz
-                  </Button>
+                  <QuizAccessButton courseId={id} onQuizAccess={() => setCurrentView('quiz')} />
                 )}
                 
                 {/* Instructor can create quiz */}
@@ -186,7 +192,7 @@ const CourseDetails = () => {
           {currentView === 'video' && selectedLesson && (
             <VideoPlayer 
               lesson={selectedLesson}
-              onProgress={(data) => console.log('Progress:', data)}
+              onProgress={handleVideoProgress}
             />
           )}
 

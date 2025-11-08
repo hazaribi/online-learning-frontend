@@ -4,7 +4,12 @@ import {
   Card, CardContent, IconButton 
 } from '@mui/material';
 import { CloudUpload, Delete, VideoFile } from '@mui/icons-material';
-import { supabase } from '../../services/supabase';
+let supabase;
+try {
+  supabase = require('../../services/supabase').supabase;
+} catch (error) {
+  console.error('Supabase not configured:', error.message);
+}
 
 const VideoUpload = ({ onUploadComplete, existingVideoUrl }) => {
   const [uploading, setUploading] = useState(false);
@@ -15,6 +20,11 @@ const VideoUpload = ({ onUploadComplete, existingVideoUrl }) => {
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    if (!supabase) {
+      setError('Video upload not configured. Please contact administrator.');
+      return;
+    }
 
     // Validate file type
     if (!file.type.startsWith('video/')) {
