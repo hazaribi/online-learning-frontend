@@ -13,7 +13,7 @@ const CourseList = () => {
     search: '',
     category: '',
     sortBy: 'newest',
-    priceRange: [0, 200],
+    priceRange: [0, 2000],
     freeOnly: false
   });
   const navigate = useNavigate();
