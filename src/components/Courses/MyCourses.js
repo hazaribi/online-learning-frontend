@@ -19,7 +19,17 @@ const MyCourses = () => {
   const fetchMyCourses = async () => {
     try {
       const response = await enrollmentAPI.getMyCourses();
-      setCourses(response.data.courses || []);
+      console.log('My courses response:', response.data);
+      
+      // Extract courses from enrollments
+      const enrollments = response.data.enrollments || [];
+      const coursesData = enrollments.map(enrollment => ({
+        ...enrollment.course,
+        enrolled_at: enrollment.enrolled_at,
+        progress: enrollment.progress || 0
+      }));
+      
+      setCourses(coursesData);
     } catch (error) {
       console.error('Error fetching my courses:', error);
     } finally {
