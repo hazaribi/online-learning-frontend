@@ -4,7 +4,7 @@ import {
   List, ListItem, ListItemText, Chip 
 } from '@mui/material';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
-import axios from 'axios';
+import { progressAPI } from '../../services/api';
 
 const ProgressTracker = ({ userId, courseId }) => {
   const [progress, setProgress] = useState(null);
@@ -17,9 +17,7 @@ const ProgressTracker = ({ userId, courseId }) => {
   const fetchProgress = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`/api/progress/${userId}/${courseId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await progressAPI.get(userId, courseId);
       setProgress(response.data);
     } catch (error) {
       console.error('Error fetching progress:', error);

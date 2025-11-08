@@ -55,6 +55,9 @@ export const coursesAPI = {
 export const lessonsAPI = {
   getByCourse: (courseId) => api.get(`${API_PREFIX}/lessons/${courseId}`),
   getById: (id) => api.get(`${API_PREFIX}/lessons/single/${id}`),
+  create: (lessonData) => api.post(`${API_PREFIX}/lessons`, lessonData),
+  update: (id, lessonData) => api.put(`${API_PREFIX}/lessons/${id}`, lessonData),
+  delete: (id) => api.delete(`${API_PREFIX}/lessons/${id}`),
 };
 
 // Progress API

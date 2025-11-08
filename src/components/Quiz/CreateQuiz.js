@@ -5,7 +5,7 @@ import {
   IconButton, Alert, Divider
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const CreateQuiz = () => {
   const { courseId } = useParams();
@@ -106,12 +106,9 @@ const CreateQuiz = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/quiz/create', {
+      await api.post('/api/quiz/create', {
         ...quizData,
         course_id: courseId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       navigate(`/course/${courseId}`);

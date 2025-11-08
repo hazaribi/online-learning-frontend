@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Radio, RadioGroup, 
   FormControlLabel, Button, Alert, LinearProgress 
 } from '@mui/material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const QuizComponent = ({ courseId, onComplete }) => {
   const [quiz, setQuiz] = useState(null);
@@ -19,9 +19,7 @@ const QuizComponent = ({ courseId, onComplete }) => {
   const fetchQuiz = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`/api/quiz/${courseId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/api/quiz/${courseId}`);
       setQuiz(response.data.quiz);
     } catch (error) {
       console.error('Error fetching quiz:', error);
@@ -40,11 +38,9 @@ const QuizComponent = ({ courseId, onComplete }) => {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/quiz/submit', {
+      const response = await api.post('/api/quiz/submit', {
         quiz_id: quiz.id,
         answers: Object.values(answers)
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       
       setResult(response.data);

@@ -3,7 +3,7 @@ import {
   IconButton, Badge, Menu, MenuItem, Typography, Box, Divider 
 } from '@mui/material';
 import { Notifications, NotificationsNone } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -19,9 +19,7 @@ const NotificationBell = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      const response = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/notifications');
       
       const notifs = response.data.notifications || [];
       setNotifications(notifs);
@@ -44,9 +42,7 @@ const NotificationBell = () => {
   const markAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/notifications/${notificationId}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/api/notifications/${notificationId}/read`, {});
       
       setNotifications(prev => 
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
