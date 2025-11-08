@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
   School, TrendingUp, People, Star, PlayArrow, CheckCircle,
-  Code, Business, Design, DataObject
+  Code, Business, Palette, DataObject
 } from '@mui/icons-material';
 
 const HomePage = ({ user }) => {
@@ -39,7 +39,7 @@ const HomePage = ({ user }) => {
     { name: 'Web Development', icon: <Code />, courses: 45, color: '#2196F3' },
     { name: 'Data Science', icon: <DataObject />, courses: 32, color: '#4CAF50' },
     { name: 'Business', icon: <Business />, courses: 28, color: '#FF9800' },
-    { name: 'Design', icon: <Design />, courses: 21, color: '#E91E63' }
+    { name: 'Design', icon: <Palette />, courses: 21, color: '#E91E63' }
   ];
 
   const testimonials = [
