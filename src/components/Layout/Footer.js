@@ -67,7 +67,7 @@ const Footer = () => {
         
         <Box sx={{ borderTop: 1, borderColor: 'rgba(255,255,255,0.2)', mt: 4, pt: 3 }}>
           <Typography variant="body2" align="center">
-            © 2024 Learning Platform. All rights reserved. | Privacy Policy | Terms of Service
+            © 2025 Learning Platform. All rights reserved. | Privacy Policy | Terms of Service
           </Typography>
         </Box>
       </Container>

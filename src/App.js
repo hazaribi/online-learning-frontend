@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
+import HomePage from './components/Home/HomePage';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import CourseList from './components/Courses/CourseList';
@@ -59,19 +60,19 @@ function App() {
       <Router>
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar user={user} onLogout={handleLogout} />
-          <Container maxWidth="lg" sx={{ flex: 1, py: 2 }}>
+          <Box sx={{ flex: 1 }}>
             <Routes>
-              <Route path="/" element={<CourseList />} />
-              <Route path="/courses" element={<CourseList />} />
-              <Route path="/course/:id" element={<CourseDetails />} />
+              <Route path="/" element={<HomePage user={user} />} />
+              <Route path="/courses" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseList /></Container>} />
+              <Route path="/course/:id" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseDetails /></Container>} />
               <Route path="/course/:id" element={<PaymentSuccess />} />
               <Route 
                 path="/create-course" 
-                element={user?.role === 'instructor' ? <CreateCourse /> : <Navigate to="/" />} 
+                element={user?.role === 'instructor' ? <Container maxWidth="lg" sx={{ py: 2 }}><CreateCourse /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/instructor" 
-                element={user?.role === 'instructor' ? <InstructorDashboard /> : <Navigate to="/" />} 
+                element={user?.role === 'instructor' ? <Container maxWidth="lg" sx={{ py: 2 }}><InstructorDashboard /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/create-quiz/:courseId" 
@@ -79,26 +80,26 @@ function App() {
               />
               <Route 
                 path="/login" 
-                element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} 
+                element={!user ? <Container maxWidth="lg" sx={{ py: 2 }}><Login onLogin={handleLogin} /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/signup" 
-                element={!user ? <Signup onSignup={handleSignup} /> : <Navigate to="/" />} 
+                element={!user ? <Container maxWidth="lg" sx={{ py: 2 }}><Signup onSignup={handleSignup} /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/admin" 
-                element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} 
+                element={user?.role === 'admin' ? <Container maxWidth="lg" sx={{ py: 2 }}><AdminDashboard /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/progress/:courseId" 
-                element={user ? <ProgressPage /> : <Navigate to="/login" />} 
+                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><ProgressPage /></Container> : <Navigate to="/login" />} 
               />
               <Route 
                 path="/my-stats" 
-                element={user ? <UserStats userId={user.id} /> : <Navigate to="/login" />} 
+                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><UserStats userId={user.id} /></Container> : <Navigate to="/login" />} 
               />
             </Routes>
-          </Container>
+          </Box>
           <Footer />
         </Box>
       </Router>
