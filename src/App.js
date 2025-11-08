@@ -65,7 +65,7 @@ function App() {
               <Route path="/" element={<HomePage user={user} />} />
               <Route path="/courses" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseList /></Container>} />
               <Route path="/course/:id" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseDetails /></Container>} />
-              <Route path="/course/:id" element={<PaymentSuccess />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route 
                 path="/create-course" 
                 element={user?.role === 'instructor' ? <Container maxWidth="lg" sx={{ py: 2 }}><CreateCourse /></Container> : <Navigate to="/" />} 
