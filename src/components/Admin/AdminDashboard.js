@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Card, CardContent, Table, 
-  TableBody, TableCell, TableContainer, TableHead, TableRow, Paper 
+  TableBody, TableCell, TableContainer, TableHead, TableRow 
 } from '@mui/material';
 import { 
   People, School, TrendingUp, AttachMoney 

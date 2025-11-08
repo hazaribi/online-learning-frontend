@@ -22,7 +22,7 @@ const CourseDetails = () => {
 
   useEffect(() => {
     fetchCourseData();
-  }, [id]);
+  }, [id, fetchCourseData]);
 
   const fetchCourseData = async () => {
     try {
