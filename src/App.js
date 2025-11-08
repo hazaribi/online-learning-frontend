@@ -7,6 +7,7 @@ import Footer from './components/Layout/Footer';
 import HomePage from './components/Home/HomePage';
 import MyCourses from './components/Courses/MyCourses';
 import Login from './components/Auth/Login';
+import AdminLogin from './components/Auth/AdminLogin';
 import Signup from './components/Auth/Signup';
 import CourseList from './components/Courses/CourseList';
 import CourseDetails from './components/Courses/CourseDetails';
@@ -83,6 +84,10 @@ function App() {
               <Route 
                 path="/login" 
                 element={!user ? <Container maxWidth="lg" sx={{ py: 2 }}><Login onLogin={handleLogin} /></Container> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin-login" 
+                element={!user ? <AdminLogin onLogin={handleLogin} /> : <Navigate to="/admin" />} 
               />
               <Route 
                 path="/signup" 

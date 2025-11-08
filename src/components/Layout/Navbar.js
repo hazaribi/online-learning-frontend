@@ -71,6 +71,17 @@ const Navbar = ({ user, onLogout }) => {
               <Button color="inherit" onClick={() => navigate('/signup')}>
                 Sign Up
               </Button>
+              <Button 
+                color="inherit" 
+                onClick={() => navigate('/admin-login')}
+                sx={{ 
+                  border: '1px solid currentColor',
+                  ml: 1,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Admin
+              </Button>
             </>
           )}
         </Box>
