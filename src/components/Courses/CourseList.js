@@ -29,8 +29,11 @@ const CourseList = () => {
   const fetchCourses = async () => {
     try {
       const response = await coursesAPI.getAll();
-      setCourses(response.data.courses);
-      setFilteredCourses(response.data.courses);
+      console.log('API Response:', response.data);
+      const coursesData = response.data.courses || [];
+      console.log('Courses:', coursesData);
+      setCourses(coursesData);
+      setFilteredCourses(coursesData);
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
@@ -257,6 +260,10 @@ const CourseList = () => {
                     variant="contained" 
                     fullWidth
                     size="large"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/course/${course.id}`);
+                    }}
                     sx={{ 
                       py: 1.5,
                       fontSize: '1rem',
