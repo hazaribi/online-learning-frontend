@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Alert, CircularProgress } from '@mui/material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const PaymentForm = ({ course, onSuccess }) => {
   const [loading, setLoading] = useState(false);
@@ -12,10 +12,8 @@ const PaymentForm = ({ course, onSuccess }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/payment/create-checkout-session', {
+      const response = await api.post('/api/payment/create-checkout-session', {
         course_id: course.id
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       // Redirect to Stripe checkout
