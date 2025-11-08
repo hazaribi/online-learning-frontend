@@ -6,7 +6,7 @@ import {
 import { 
   People, School, TrendingUp, AttachMoney 
 } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -24,10 +24,12 @@ const AdminDashboard = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [statsRes, usersRes, coursesRes] = await Promise.all([
-        axios.get('/api/admin/dashboard', { headers }),
-        axios.get('/api/admin/users', { headers }),
-        axios.get('/api/admin/courses', { headers })
+        api.get('/api/admin/dashboard'),
+        api.get('/api/admin/users'),
+        api.get('/api/admin/courses')
       ]);
+      
+      console.log('Admin dashboard data:', { statsRes, usersRes, coursesRes });
 
       setStats(statsRes.data.stats);
       setUsers(usersRes.data.users);
