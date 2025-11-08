@@ -28,6 +28,9 @@ const Navbar = ({ user, onLogout }) => {
               <Button color="inherit" onClick={() => navigate('/courses')}>
                 Courses
               </Button>
+              <Button color="inherit" onClick={() => navigate('/my-courses')}>
+                My Courses
+              </Button>
               <Button color="inherit" onClick={() => navigate('/my-stats')}>
                 My Progress
               </Button>

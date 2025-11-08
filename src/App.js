@@ -5,6 +5,7 @@ import { CssBaseline, Container, Box } from '@mui/material';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import HomePage from './components/Home/HomePage';
+import MyCourses from './components/Courses/MyCourses';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import CourseList from './components/Courses/CourseList';
@@ -64,6 +65,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage user={user} />} />
               <Route path="/courses" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseList /></Container>} />
+              <Route path="/my-courses" element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><MyCourses /></Container> : <Navigate to="/login" />} />
               <Route path="/course/:id" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseDetails /></Container>} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Box, Typography, Grid, Card, CardContent, List, ListItem, 
   ListItemText, Button, Chip, Alert 
@@ -13,16 +13,26 @@ import QuizComponent from '../Quiz/QuizComponent';
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [currentView, setCurrentView] = useState('overview');
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   useEffect(() => {
     fetchCourseData();
-  }, [id]);
+    
+    // Check for payment success
+    if (searchParams.get('payment') === 'success') {
+      setPaymentSuccess(true);
+      setEnrolled(true);
+      // Remove payment param from URL
+      navigate(`/course/${id}`, { replace: true });
+    }
+  }, [id, searchParams, navigate]);
 
   const fetchCourseData = React.useCallback(async () => {
     try {
@@ -189,6 +199,12 @@ const CourseDetails = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
+          {paymentSuccess && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              🎉 Payment successful! You are now enrolled in this course.
+            </Alert>
+          )}
+          
           {!enrolled ? (
             <Box>
               {course.price === 0 || course.price === '0' ? (
