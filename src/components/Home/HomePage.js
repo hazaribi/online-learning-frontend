@@ -16,22 +16,26 @@ const HomePage = ({ user }) => {
     {
       icon: <School />,
       title: 'Expert-Led Courses',
-      description: 'Learn from industry professionals with real-world experience'
+      description: 'Learn from industry professionals with real-world experience',
+      action: () => navigate('/courses')
     },
     {
       icon: <TrendingUp />,
       title: 'Track Progress',
-      description: 'Monitor your learning journey with detailed analytics'
+      description: 'Monitor your learning journey with detailed analytics',
+      action: () => user ? navigate('/my-stats') : navigate('/login')
     },
     {
       icon: <People />,
       title: 'Community Learning',
-      description: 'Connect with learners and instructors worldwide'
+      description: 'Connect with learners and instructors worldwide',
+      action: () => navigate('/courses')
     },
     {
       icon: <CheckCircle />,
       title: 'Certificates',
-      description: 'Earn certificates upon course completion'
+      description: 'Earn certificates upon course completion',
+      action: () => user ? navigate('/my-stats') : navigate('/login')
     }
   ];
 
@@ -192,7 +196,21 @@ const HomePage = ({ user }) => {
           <Grid container spacing={4}>
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card sx={{ height: '100%', textAlign: 'center', p: 2, boxShadow: 3 }}>
+                <Card 
+                  sx={{ 
+                    height: '100%', 
+                    textAlign: 'center', 
+                    p: 2, 
+                    boxShadow: 3,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 6
+                    }
+                  }}
+                  onClick={feature.action}
+                >
                   <CardContent>
                     <Box sx={{ color: '#667eea', mb: 2 }}>
                       {React.cloneElement(feature.icon, { sx: { fontSize: 48 } })}
