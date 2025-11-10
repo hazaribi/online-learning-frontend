@@ -50,11 +50,7 @@ const VideoUpload = ({ onUploadComplete, existingVideoUrl }) => {
       // Upload to Supabase Storage
       const { data, error: uploadError } = await supabase.storage
         .from('videos')
-        .upload(filePath, file, {
-          onUploadProgress: (progress) => {
-            setUploadProgress((progress.loaded / progress.total) * 100);
-          }
-        });
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
