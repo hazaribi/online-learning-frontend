@@ -23,6 +23,8 @@ const Navbar = ({ user, onLogout }) => {
       newActiveTab = '/my-stats';
     } else if (currentPath.startsWith('/courses') || currentPath.startsWith('/course/')) {
       newActiveTab = '/courses';
+    } else if (currentPath.startsWith('/admin/courses') || currentPath.startsWith('/admin/create-course') || currentPath.startsWith('/admin/edit-course')) {
+      newActiveTab = '/admin/courses';
     } else if (currentPath.startsWith('/admin')) {
       newActiveTab = '/admin';
     } else if (currentPath === '/') {
@@ -102,13 +104,22 @@ const Navbar = ({ user, onLogout }) => {
                 </>
               )}
               {user.role === 'admin' && (
-                <Button 
-                  color="inherit" 
-                  onClick={() => handleNavigation('/admin')}
-                  sx={{ bgcolor: activeTab === '/admin' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
-                >
-                  Admin
-                </Button>
+                <>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/admin')}
+                    sx={{ bgcolor: activeTab === '/admin' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/admin/courses')}
+                    sx={{ bgcolor: activeTab === '/admin/courses' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
+                    Manage Courses
+                  </Button>
+                </>
               )}
               <NotificationBell />
               <Typography 

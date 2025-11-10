@@ -18,6 +18,8 @@ import InstructorDashboard from './components/Instructor/InstructorDashboard';
 import UserStats from './components/Progress/UserStats';
 import PaymentSuccess from './components/Payment/PaymentSuccess';
 import AdminDashboard from './components/Admin/AdminDashboard';
+import AdminCourseManagement from './components/Admin/AdminCourseManagement';
+import AdminCreateCourse from './components/Admin/AdminCreateCourse';
 import ProgressPage from './components/Progress/ProgressPage';
 
 const theme = createTheme({
@@ -111,6 +113,18 @@ function App() {
               <Route 
                 path="/admin" 
                 element={user?.role === 'admin' ? <Container maxWidth="lg" sx={{ py: 2 }}><AdminDashboard /></Container> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin/courses" 
+                element={user?.role === 'admin' ? <Container maxWidth="lg" sx={{ py: 2 }}><AdminCourseManagement /></Container> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin/create-course" 
+                element={user?.role === 'admin' ? <Container maxWidth="lg" sx={{ py: 2 }}><AdminCreateCourse /></Container> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/admin/edit-course/:id" 
+                element={user?.role === 'admin' ? <Container maxWidth="lg" sx={{ py: 2 }}><EditCourse /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/progress/:courseId" 
