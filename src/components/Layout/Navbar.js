@@ -9,8 +9,28 @@ const Navbar = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('/');
 
   useEffect(() => {
-    const savedTab = sessionStorage.getItem('activeTab') || location.pathname;
-    setActiveTab(savedTab);
+    const currentPath = location.pathname;
+    let newActiveTab = '/';
+    
+    // Map paths to navigation tabs
+    if (currentPath.startsWith('/create-course') || currentPath.startsWith('/edit-course') || currentPath.startsWith('/create-quiz')) {
+      newActiveTab = '/create-course';
+    } else if (currentPath.startsWith('/instructor')) {
+      newActiveTab = '/instructor';
+    } else if (currentPath.startsWith('/my-courses')) {
+      newActiveTab = '/my-courses';
+    } else if (currentPath.startsWith('/my-stats') || currentPath.startsWith('/progress/')) {
+      newActiveTab = '/my-stats';
+    } else if (currentPath.startsWith('/courses') || currentPath.startsWith('/course/')) {
+      newActiveTab = '/courses';
+    } else if (currentPath.startsWith('/admin')) {
+      newActiveTab = '/admin';
+    } else if (currentPath === '/') {
+      newActiveTab = '/';
+    }
+    
+    setActiveTab(newActiveTab);
+    sessionStorage.setItem('activeTab', newActiveTab);
   }, [location.pathname]);
 
   const handleNavigation = (path) => {
