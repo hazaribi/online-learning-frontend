@@ -57,7 +57,8 @@ const QuizAccessButton = ({ courseId, onQuizAccess }) => {
 
       // Get progress for each lesson
       const progressRes = await progressAPI.get(user.id, courseId);
-      const completedLessons = progressRes.data.lessons_completed || 0;
+      const progressData = progressRes.data || progressRes;
+      const completedLessons = progressData.lessons_completed || 0;
       const canTake = completedLessons === lessons.length;
       
       setLessonsCompleted(completedLessons);
