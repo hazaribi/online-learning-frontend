@@ -102,7 +102,18 @@ const CourseDetails = () => {
 
   const handleVideoProgress = async (progressData) => {
     try {
+      // Throttle progress updates to prevent duplicate requests
+      const throttleKey = `progress_${progressData.lesson_id}`;
+      const lastUpdate = sessionStorage.getItem(throttleKey);
+      
+      if (lastUpdate && Date.now() - parseInt(lastUpdate) < 2000) {
+        return; // Skip if updated within last 2 seconds
+      }
+      
+      sessionStorage.setItem(throttleKey, Date.now().toString());
+      
       await progressAPI.update(progressData);
+      
       // Only refresh on lesson completion, not every progress update
       if (progressData.completed) {
         // Clear all related caches
