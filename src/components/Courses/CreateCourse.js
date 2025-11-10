@@ -52,7 +52,8 @@ const CreateCourse = () => {
     setError('');
 
     try {
-      const course = await coursesAPI.create(formData);
+      const courseResponse = await coursesAPI.create(formData);
+      const course = courseResponse.data.course || courseResponse.data;
       
       // Create lessons for the course
       for (const lesson of lessons) {
@@ -66,6 +67,7 @@ const CreateCourse = () => {
       
       navigate('/courses');
     } catch (error) {
+      console.error('Course creation error:', error);
       setError(error.response?.data?.error || 'Failed to create course');
     } finally {
       setLoading(false);
