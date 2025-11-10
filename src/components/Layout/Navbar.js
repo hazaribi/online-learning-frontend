@@ -1,10 +1,23 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import NotificationBell from '../Notifications/NotificationBell';
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState('/');
+
+  useEffect(() => {
+    const savedTab = sessionStorage.getItem('activeTab') || location.pathname;
+    setActiveTab(savedTab);
+  }, [location.pathname]);
+
+  const handleNavigation = (path) => {
+    setActiveTab(path);
+    sessionStorage.setItem('activeTab', path);
+    navigate(path);
+  };
   return (
     <AppBar position="static">
       <Toolbar>
@@ -25,31 +38,55 @@ const Navbar = ({ user, onLogout }) => {
         }}>
           {user ? (
             <>
-              <Button color="inherit" onClick={() => navigate('/courses')}>
+              <Button 
+                color="inherit" 
+                onClick={() => handleNavigation('/courses')}
+                sx={{ bgcolor: activeTab === '/courses' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+              >
                 Courses
               </Button>
               {user.role === 'student' && (
                 <>
-                  <Button color="inherit" onClick={() => navigate('/my-courses')}>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/my-courses')}
+                    sx={{ bgcolor: activeTab === '/my-courses' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
                     My Courses
                   </Button>
-                  <Button color="inherit" onClick={() => navigate('/my-stats')}>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/my-stats')}
+                    sx={{ bgcolor: activeTab === '/my-stats' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
                     My Progress
                   </Button>
                 </>
               )}
               {user.role === 'instructor' && (
                 <>
-                  <Button color="inherit" onClick={() => navigate('/instructor')}>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/instructor')}
+                    sx={{ bgcolor: activeTab === '/instructor' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
                     Dashboard
                   </Button>
-                  <Button color="inherit" onClick={() => navigate('/create-course')}>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/create-course')}
+                    sx={{ bgcolor: activeTab === '/create-course' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
                     Create Course
                   </Button>
                 </>
               )}
               {user.role === 'admin' && (
-                <Button color="inherit" onClick={() => navigate('/admin')}>
+                <Button 
+                  color="inherit" 
+                  onClick={() => handleNavigation('/admin')}
+                  sx={{ bgcolor: activeTab === '/admin' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                >
                   Admin
                 </Button>
               )}

@@ -12,6 +12,7 @@ import Signup from './components/Auth/Signup';
 import CourseList from './components/Courses/CourseList';
 import CourseDetails from './components/Courses/CourseDetails';
 import CreateCourse from './components/Courses/CreateCourse';
+import EditCourse from './components/Courses/EditCourse';
 import CreateQuiz from './components/Quiz/CreateQuiz';
 import InstructorDashboard from './components/Instructor/InstructorDashboard';
 import UserStats from './components/Progress/UserStats';
@@ -82,6 +83,10 @@ function App() {
               <Route 
                 path="/create-course" 
                 element={user?.role === 'instructor' ? <Container maxWidth="lg" sx={{ py: 2 }}><CreateCourse /></Container> : <Navigate to="/" />} 
+              />
+              <Route 
+                path="/edit-course/:id" 
+                element={user?.role === 'instructor' ? <Container maxWidth="lg" sx={{ py: 2 }}><EditCourse /></Container> : <Navigate to="/" />} 
               />
               <Route 
                 path="/instructor" 

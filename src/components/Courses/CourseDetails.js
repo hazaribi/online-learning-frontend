@@ -4,7 +4,7 @@ import {
   Box, Typography, Grid, Card, CardContent, List, ListItem, 
   ListItemText, Button, Chip, Alert 
 } from '@mui/material';
-import { PlayCircleOutline, Quiz, Person } from '@mui/icons-material';
+import { PlayCircleOutline, Quiz, Person, Edit } from '@mui/icons-material';
 import { coursesAPI, lessonsAPI, enrollmentAPI, progressAPI } from '../../services/api';
 import PaymentForm from '../Payment/PaymentForm';
 import VideoPlayer from '../Video/VideoPlayer';
@@ -224,15 +224,23 @@ const CourseDetails = () => {
                   <QuizAccessButton courseId={id} onQuizAccess={() => setCurrentView('quiz')} />
                 )}
                 
-                {/* Instructor can create quiz */}
+                {/* Instructor actions */}
                 {JSON.parse(localStorage.getItem('user') || '{}').role === 'instructor' && (
-                  <Button
-                    variant="outlined"
-                    onClick={() => navigate(`/create-quiz/${id}`)}
-                    sx={{ mt: 2, ml: 2 }}
-                  >
-                    Create Quiz
-                  </Button>
+                  <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => navigate(`/create-quiz/${id}`)}
+                    >
+                      Create Quiz
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Edit />}
+                      onClick={() => navigate(`/edit-course/${id}`)}
+                    >
+                      Edit Course
+                    </Button>
+                  </Box>
                 )}
               </CardContent>
             </Card>

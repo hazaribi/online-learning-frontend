@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Alert, MenuItem, Divider } from '@mui/material';
 import { coursesAPI, lessonsAPI } from '../../services/api';
 import VideoUpload from '../Video/VideoUpload';
 
-const CreateCourse = () => {
+const EditCourse = () => {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -12,14 +13,50 @@ const CreateCourse = () => {
     category: '',
     thumbnail_url: ''
   });
-  const [lessons, setLessons] = useState([{ title: '', description: '', video_url: '', order_index: 1 }]);
+  const [lessons, setLessons] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const navigate = useNavigate();
 
   const categories = ['Programming', 'Web Development', 'Mobile Development', 'Data Science', 'Design', 'Business', 'Other'];
+
+  useEffect(() => {
+    fetchCourseData();
+  }, [id]);
+
+  const fetchCourseData = async () => {
+    try {
+      const [courseRes, lessonsRes] = await Promise.all([
+        coursesAPI.getById(id),
+        lessonsAPI.getByCourse(id)
+      ]);
+      
+      const course = courseRes.data.course;
+      setFormData({
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        category: course.category,
+        thumbnail_url: course.thumbnail_url || ''
+      });
+      
+      const courseLessons = lessonsRes.data.lessons || [];
+      setLessons(courseLessons.length > 0 ? courseLessons : [{ title: '', description: '', video_url: '', order_index: 1 }]);
+      
+      // Check if category is custom
+      if (!categories.includes(course.category) && course.category !== 'Other') {
+        setShowCustomCategory(true);
+        setCustomCategory(course.category);
+      }
+    } catch (error) {
+      setError('Failed to load course data');
+    } finally {
+      setFetchLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,31 +105,45 @@ const CreateCourse = () => {
     setError('');
 
     try {
-      const courseResponse = await coursesAPI.create(formData);
-      const course = courseResponse.data.course || courseResponse.data;
+      // Update course
+      await coursesAPI.update(id, formData);
       
-      // Create lessons for the course
+      // Update lessons
       for (const lesson of lessons) {
         if (lesson.title && lesson.video_url) {
-          await lessonsAPI.create({
-            ...lesson,
-            course_id: course.id
-          });
+          if (lesson.id) {
+            // Update existing lesson
+            await lessonsAPI.update(lesson.id, {
+              title: lesson.title,
+              description: lesson.description,
+              video_url: lesson.video_url,
+              order_index: lesson.order_index
+            });
+          } else {
+            // Create new lesson
+            await lessonsAPI.create({
+              ...lesson,
+              course_id: id
+            });
+          }
         }
       }
       
-      navigate('/courses');
+      navigate(`/course/${id}`);
     } catch (error) {
-      console.error('Course creation error:', error);
-      setError(error.response?.data?.error || 'Failed to create course');
+      setError(error.response?.data?.error || 'Failed to update course');
     } finally {
       setLoading(false);
     }
   };
 
+  if (fetchLoading) {
+    return <Typography>Loading course data...</Typography>;
+  }
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Create New Course</Typography>
+      <Typography variant="h4" gutterBottom>Edit Course</Typography>
       
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
@@ -224,17 +275,25 @@ const CreateCourse = () => {
         Add Another Lesson
       </Button>
       
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3 }}
-        disabled={loading}
-      >
-        {loading ? 'Creating...' : 'Create Course'}
-      </Button>
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate(`/course/${id}`)}
+          sx={{ flex: 1 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{ flex: 1 }}
+          disabled={loading}
+        >
+          {loading ? 'Updating...' : 'Update Course'}
+        </Button>
+      </Box>
     </Box>
   );
 };
 
-export default CreateCourse;
+export default EditCourse;
