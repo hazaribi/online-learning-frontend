@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Grid, Card, CardContent, CardMedia, Typography, Button, Box, Chip } from '@mui/material';
 import { Star, Person, PlayCircleOutline } from '@mui/icons-material';
 import { coursesAPI } from '../../services/api';
+import { cacheService } from '../../services/cache';
 import CourseFilters from './CourseFilters';
 
 const CourseList = () => {
@@ -28,7 +29,7 @@ const CourseList = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await coursesAPI.getAll();
+      const response = await cacheService.get('all_courses', () => coursesAPI.getAll(), 60000);
       console.log('API Response:', response.data);
       const coursesData = response.data.courses || [];
       console.log('Courses:', coursesData);

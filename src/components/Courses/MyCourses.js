@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { PlayCircleOutline, CheckCircle } from '@mui/icons-material';
 import { enrollmentAPI } from '../../services/api';
+import { cacheService } from '../../services/cache';
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -18,7 +19,8 @@ const MyCourses = () => {
 
   const fetchMyCourses = async () => {
     try {
-      const response = await enrollmentAPI.getMyCourses();
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const response = await cacheService.get(`my_courses_${user.id}`, () => enrollmentAPI.getMyCourses(), 30000);
       console.log('My courses response:', response.data);
       
       // Extract courses from enrollments

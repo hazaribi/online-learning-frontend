@@ -25,11 +25,19 @@ const NotificationBell = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
+      // Skip if already fetched recently
+      const lastFetch = sessionStorage.getItem('notifications_last_fetch');
+      if (lastFetch && Date.now() - parseInt(lastFetch) < 60000) {
+        return;
+      }
+      
       const response = await api.get('/api/notifications');
       
       const notifs = response.data.notifications || [];
       setNotifications(notifs);
       setUnreadCount(notifs.filter(n => !n.read).length);
+      
+      sessionStorage.setItem('notifications_last_fetch', Date.now().toString());
     } catch (error) {
       console.error('Error fetching notifications:', error);
       setNotifications([]);
