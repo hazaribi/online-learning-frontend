@@ -34,8 +34,8 @@ const QuizAccessButton = ({ courseId, onQuizAccess }) => {
       const cached = sessionStorage.getItem(cacheKey);
       const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
       
-      // Use cache if less than 30 seconds old
-      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 30000) {
+      // Use cache if less than 10 seconds old (shorter for quiz access)
+      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 10000) {
         const data = JSON.parse(cached);
         setTotalLessons(data.totalLessons);
         setLessonsCompleted(data.lessonsCompleted);
@@ -59,6 +59,12 @@ const QuizAccessButton = ({ courseId, onQuizAccess }) => {
       const progressRes = await progressAPI.get(user.id, courseId);
       const progressData = progressRes.data || progressRes;
       const completedLessons = progressData.lessons_completed || 0;
+      
+      console.log('Quiz Access Check:', {
+        totalLessons: lessons.length,
+        completedLessons,
+        progressData
+      });
       const canTake = completedLessons === lessons.length;
       
       setLessonsCompleted(completedLessons);

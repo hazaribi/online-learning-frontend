@@ -37,6 +37,20 @@ const CourseDetails = () => {
 
   const fetchCourseData = React.useCallback(async () => {
     try {
+      // Use cache to prevent duplicate requests
+      const cacheKey = `course_${id}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
+      
+      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 120000) {
+        const data = JSON.parse(cached);
+        setCourse(data.course);
+        setLessons(data.lessons);
+        setEnrolled(data.enrolled);
+        setLoading(false);
+        return;
+      }
+      
       const [courseRes, lessonsRes] = await Promise.all([
         coursesAPI.getById(id),
         lessonsAPI.getByCourse(id)
@@ -47,14 +61,26 @@ const CourseDetails = () => {
       
       // Check enrollment status
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+      let enrolled = false;
       if (user.id) {
         try {
           const response = await enrollmentAPI.checkEnrollment(id);
-          setEnrolled(response.data.enrolled);
+          enrolled = response.data.enrolled;
+          setEnrolled(enrolled);
         } catch (error) {
           setEnrolled(false);
         }
       }
+      
+      // Cache the result
+      const cacheData = {
+        course: courseRes.data.course,
+        lessons: lessonsRes.data.lessons,
+        enrolled
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      sessionStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+      
     } catch (error) {
       console.error('Error fetching course:', error);
     } finally {
@@ -79,10 +105,19 @@ const CourseDetails = () => {
       await progressAPI.update(progressData);
       // Only refresh on lesson completion, not every progress update
       if (progressData.completed) {
-        // Add delay to prevent rate limiting
+        // Clear all related caches
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const courseKey = `course_${id}`;
+        const progressKey = `lesson_progress_${id}_${user.id}`;
+        
+        sessionStorage.removeItem(courseKey);
+        sessionStorage.removeItem(`${courseKey}_time`);
+        sessionStorage.removeItem(progressKey);
+        sessionStorage.removeItem(`${progressKey}_time`);
+        
         setTimeout(() => {
           fetchCourseData();
-        }, 1000);
+        }, 2000);
       }
     } catch (error) {
       console.error('Error updating progress:', error);

@@ -13,10 +13,8 @@ const NotificationBell = () => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.id) {
+      // Only fetch on mount, no polling
       fetchNotifications();
-      // Fetch notifications every 5 minutes instead of constantly
-      const interval = setInterval(fetchNotifications, 300000);
-      return () => clearInterval(interval);
     }
   }, []);
 
@@ -25,9 +23,9 @@ const NotificationBell = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      // Skip if already fetched recently
+      // Skip if already fetched recently (5 minutes)
       const lastFetch = sessionStorage.getItem('notifications_last_fetch');
-      if (lastFetch && Date.now() - parseInt(lastFetch) < 60000) {
+      if (lastFetch && Date.now() - parseInt(lastFetch) < 300000) {
         return;
       }
       
