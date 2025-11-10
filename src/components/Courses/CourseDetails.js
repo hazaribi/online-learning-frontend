@@ -77,9 +77,12 @@ const CourseDetails = () => {
   const handleVideoProgress = async (progressData) => {
     try {
       await progressAPI.update(progressData);
-      // Refresh course data to update progress
+      // Only refresh on lesson completion, not every progress update
       if (progressData.completed) {
-        fetchCourseData();
+        // Add delay to prevent rate limiting
+        setTimeout(() => {
+          fetchCourseData();
+        }, 1000);
       }
     } catch (error) {
       console.error('Error updating progress:', error);

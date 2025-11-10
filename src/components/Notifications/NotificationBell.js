@@ -11,7 +11,13 @@ const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    fetchNotifications();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.id) {
+      fetchNotifications();
+      // Fetch notifications every 5 minutes instead of constantly
+      const interval = setInterval(fetchNotifications, 300000);
+      return () => clearInterval(interval);
+    }
   }, []);
 
   const fetchNotifications = async () => {

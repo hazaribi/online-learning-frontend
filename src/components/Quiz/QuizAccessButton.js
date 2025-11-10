@@ -10,12 +10,39 @@ const QuizAccessButton = ({ courseId, onQuizAccess }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkLessonCompletion();
+    if (courseId) {
+      checkLessonCompletion();
+    }
   }, [courseId]);
+
+  // Add refresh function for external calls
+  const refreshProgress = () => {
+    checkLessonCompletion();
+  };
+
+  // Expose refresh function
+  React.useImperativeHandle(React.forwardRef(() => null), () => ({
+    refreshProgress
+  }));
 
   const checkLessonCompletion = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Cache key for this check
+      const cacheKey = `lesson_progress_${courseId}_${user.id}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
+      
+      // Use cache if less than 30 seconds old
+      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 30000) {
+        const data = JSON.parse(cached);
+        setTotalLessons(data.totalLessons);
+        setLessonsCompleted(data.lessonsCompleted);
+        setCanTakeQuiz(data.canTakeQuiz);
+        setLoading(false);
+        return;
+      }
       
       // Get all lessons for the course
       const lessonsRes = await lessonsAPI.getByCourse(courseId);
@@ -31,9 +58,20 @@ const QuizAccessButton = ({ courseId, onQuizAccess }) => {
       // Get progress for each lesson
       const progressRes = await progressAPI.get(user.id, courseId);
       const completedLessons = progressRes.data.lessons_completed || 0;
+      const canTake = completedLessons === lessons.length;
       
       setLessonsCompleted(completedLessons);
-      setCanTakeQuiz(completedLessons === lessons.length);
+      setCanTakeQuiz(canTake);
+      
+      // Cache the result
+      const cacheData = {
+        totalLessons: lessons.length,
+        lessonsCompleted: completedLessons,
+        canTakeQuiz: canTake
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      sessionStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+      
     } catch (error) {
       console.error('Error checking lesson completion:', error);
       setCanTakeQuiz(false);
