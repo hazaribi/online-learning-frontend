@@ -101,35 +101,35 @@ const CourseDetails = () => {
   };
 
   const handleVideoProgress = async (progressData) => {
+    // Only track completion, not continuous progress
+    if (!progressData.completed) {
+      return;
+    }
+    
     try {
-      // Throttle progress updates to prevent duplicate requests
-      const throttleKey = `progress_${progressData.lesson_id}`;
-      const lastUpdate = sessionStorage.getItem(throttleKey);
-      
-      if (lastUpdate && Date.now() - parseInt(lastUpdate) < 2000) {
-        return; // Skip if updated within last 2 seconds
+      // Check if already completed to prevent duplicates
+      const completionKey = `completed_${progressData.lesson_id}`;
+      if (sessionStorage.getItem(completionKey)) {
+        return;
       }
-      
-      sessionStorage.setItem(throttleKey, Date.now().toString());
       
       await progressAPI.update(progressData);
+      sessionStorage.setItem(completionKey, 'true');
       
-      // Only refresh on lesson completion, not every progress update
-      if (progressData.completed) {
-        // Clear all related caches
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const courseKey = `course_${id}`;
-        const progressKey = `lesson_progress_${id}_${user.id}`;
-        
-        sessionStorage.removeItem(courseKey);
-        sessionStorage.removeItem(`${courseKey}_time`);
-        sessionStorage.removeItem(progressKey);
-        sessionStorage.removeItem(`${progressKey}_time`);
-        
-        setTimeout(() => {
-          fetchCourseData();
-        }, 2000);
-      }
+      // Clear caches and refresh
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const courseKey = `course_${id}`;
+      const progressKey = `lesson_progress_${id}_${user.id}`;
+      
+      sessionStorage.removeItem(courseKey);
+      sessionStorage.removeItem(`${courseKey}_time`);
+      sessionStorage.removeItem(progressKey);
+      sessionStorage.removeItem(`${progressKey}_time`);
+      
+      setTimeout(() => {
+        fetchCourseData();
+      }, 3000);
+      
     } catch (error) {
       console.error('Error updating progress:', error);
     }
