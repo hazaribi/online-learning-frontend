@@ -5,7 +5,7 @@ import {
   TableHead, TableRow, Paper, Chip, Dialog,
   DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import { Download, Certificate } from '@mui/icons-material';
+import { Download, EmojiEvents } from '@mui/icons-material';
 import { enrollmentAPI } from '../../services/api';
 
 const CertificateGenerator = () => {
@@ -124,7 +124,7 @@ const CertificateGenerator = () => {
                     <TableCell>
                       <Button
                         variant="outlined"
-                        startIcon={<Certificate />}
+                        startIcon={<EmojiEvents />}
                         onClick={() => generateCertificate(enrollment)}
                         size="small"
                       >
