@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Button, 
   Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Paper, Chip, Dialog,
-  DialogTitle, DialogContent, DialogActions
+  DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import { Download, EmojiEvents } from '@mui/icons-material';
 import { enrollmentAPI } from '../../services/api';
@@ -12,6 +12,7 @@ const CertificateGenerator = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [certificateDialog, setCertificateDialog] = useState({ open: false, enrollment: null });
+  const [studentName, setStudentName] = useState('');
 
   useEffect(() => {
     fetchCompletedEnrollments();
@@ -32,10 +33,16 @@ const CertificateGenerator = () => {
   };
 
   const generateCertificate = (enrollment) => {
+    setStudentName('');
     setCertificateDialog({ open: true, enrollment });
   };
 
   const downloadCertificate = (enrollment) => {
+    if (!studentName.trim()) {
+      alert('Please enter your name for the certificate');
+      return;
+    }
+
     const certificateContent = `
       <!DOCTYPE html>
       <html>
@@ -64,7 +71,7 @@ const CertificateGenerator = () => {
         <div class="certificate">
           <h1 class="title">Certificate of Completion</h1>
           <p class="subtitle">This is to certify that</p>
-          <h2 class="name">${enrollment.course?.title || 'Course'}</h2>
+          <h2 class="name">${studentName.trim()}</h2>
           <p class="subtitle">has successfully completed the course</p>
           <h3 class="course">${enrollment.course?.title || 'Course'}</h3>
           <p class="date">Completion Date: ${new Date(enrollment.completed_at).toLocaleDateString()}</p>
@@ -82,13 +89,14 @@ const CertificateGenerator = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `certificate-${enrollment.course?.title || 'course'}.html`;
+    a.download = `certificate-${studentName.trim()}-${enrollment.course?.title || 'course'}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
     setCertificateDialog({ open: false, enrollment: null });
+    setStudentName('');
   };
 
   if (loading) return <Typography>Loading certificates...</Typography>;
@@ -154,6 +162,14 @@ const CertificateGenerator = () => {
       >
         <DialogTitle>Certificate Preview</DialogTitle>
         <DialogContent>
+          <TextField
+            fullWidth
+            label="Enter your name for the certificate"
+            value={studentName}
+            onChange={(e) => setStudentName(e.target.value)}
+            sx={{ mb: 3 }}
+            placeholder="e.g., John Doe"
+          />
           <Box sx={{ 
             textAlign: 'center', 
             p: 4, 
@@ -165,7 +181,13 @@ const CertificateGenerator = () => {
               Certificate of Completion
             </Typography>
             <Typography variant="h6" sx={{ my: 2 }}>
-              This is to certify that you have successfully completed
+              This is to certify that
+            </Typography>
+            <Typography variant="h4" sx={{ my: 2, color: '#333', textDecoration: 'underline' }}>
+              {studentName || '[Your Name]'}
+            </Typography>
+            <Typography variant="h6" sx={{ my: 2 }}>
+              has successfully completed
             </Typography>
             <Typography variant="h4" color="primary" sx={{ my: 3, fontWeight: 'bold' }}>
               {certificateDialog.enrollment?.course?.title || 'Course Title'}
