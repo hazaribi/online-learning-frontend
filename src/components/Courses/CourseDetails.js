@@ -101,6 +101,19 @@ const CourseDetails = () => {
   };
 
   const handleVideoProgress = async (progressData) => {
+    // Update lesson duration if provided
+    if (progressData.total_duration && selectedLesson) {
+      const updatedLessons = lessons.map(lesson => 
+        lesson.id === selectedLesson.id 
+          ? { ...lesson, duration: progressData.total_duration }
+          : lesson
+      );
+      setLessons(updatedLessons);
+      
+      // Update selected lesson
+      setSelectedLesson(prev => ({ ...prev, duration: progressData.total_duration }));
+    }
+    
     // Only track completion, not continuous progress
     if (!progressData.completed) {
       return;
@@ -213,7 +226,7 @@ const CourseDetails = () => {
                       <PlayCircleOutline sx={{ mr: 2 }} />
                       <ListItemText
                         primary={lesson.title}
-                        secondary={`${Math.floor(lesson.duration / 60)} minutes`}
+                        secondary={lesson.duration ? `${Math.floor(lesson.duration / 60)} minutes` : 'Duration will load when playing'}
                       />
                       {lesson.is_free && <Chip label="Free" size="small" />}
                     </ListItem>

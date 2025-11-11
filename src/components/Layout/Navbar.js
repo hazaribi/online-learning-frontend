@@ -46,11 +46,17 @@ const Navbar = ({ user, onLogout }) => {
         <Typography 
           variant="h6" 
           component="div" 
-          sx={{ flexGrow: 1, cursor: 'pointer' }}
+          sx={{ 
+            cursor: 'pointer',
+            mr: 2,
+            display: 'inline-block',
+            '&:hover': { opacity: 0.8 }
+          }}
           onClick={() => navigate('/')}
         >
           Learning Platform
         </Typography>
+        <Box sx={{ flexGrow: 1 }} />
         
         <Box sx={{ 
           display: 'flex', 
