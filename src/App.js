@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
 import Navbar from './components/Layout/Navbar';
@@ -33,8 +33,9 @@ const theme = createTheme({
   },
 });
 
-function App() {
+function AppContent() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -64,19 +65,24 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Only clear authentication data, preserve user progress
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Clear only navigation state, not user progress data
+    sessionStorage.removeItem('activeTab');
+    
     setUser(null);
+    navigate('/');
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar user={user} onLogout={handleLogout} />
-          <Box sx={{ flex: 1 }}>
-            <Routes>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Navbar user={user} onLogout={handleLogout} />
+        <Box sx={{ flex: 1 }}>
+          <Routes>
               <Route path="/" element={<HomePage user={user} />} />
               <Route path="/courses" element={<Container maxWidth="lg" sx={{ py: 2 }}><CourseList /></Container>} />
               <Route path="/my-courses" element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><MyCourses /></Container> : <Navigate to="/login" />} />
@@ -134,12 +140,19 @@ function App() {
                 path="/my-stats" 
                 element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><UserStats userId={user.id} /></Container> : <Navigate to="/login" />} 
               />
-            </Routes>
-          </Box>
-          <Footer />
+          </Routes>
         </Box>
-      </Router>
+        <Footer />
+      </Box>
     </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
