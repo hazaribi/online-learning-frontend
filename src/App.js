@@ -143,7 +143,7 @@ function AppContent() {
               />
               <Route 
                 path="/certificates" 
-                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><CertificateGenerator /></Container> : <Navigate to="/login" />} 
+                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><CertificateGenerator user={user} /></Container> : <Navigate to="/login" />} 
               />
           </Routes>
         </Box>

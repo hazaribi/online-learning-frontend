@@ -6,27 +6,48 @@ import {
   DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import { Download, EmojiEvents } from '@mui/icons-material';
-import { enrollmentAPI } from '../../services/api';
+import { enrollmentAPI, courseAPI } from '../../services/api';
 
-const CertificateGenerator = () => {
+const CertificateGenerator = ({ user }) => {
   const [enrollments, setEnrollments] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [certificateDialog, setCertificateDialog] = useState({ open: false, enrollment: null });
   const [studentName, setStudentName] = useState('');
 
   useEffect(() => {
-    fetchCompletedEnrollments();
-  }, []);
+    if (user?.role === 'student') {
+      fetchCompletedEnrollments();
+    } else {
+      fetchInstructorCourses();
+    }
+  }, [user]);
 
   const fetchCompletedEnrollments = async () => {
     try {
       const response = await enrollmentAPI.getMyCourses();
       const completedEnrollments = (response.data.enrollments || []).filter(
-        enrollment => enrollment.progress === 100 && enrollment.completed_at
+        enrollment => enrollment.progress === 100 && 
+                     enrollment.completed_at && 
+                     enrollment.course?.price === 0
       );
       setEnrollments(completedEnrollments);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchInstructorCourses = async () => {
+    try {
+      const response = await courseAPI.getAll();
+      const instructorCourses = user?.role === 'admin' ? 
+        response.data.courses : 
+        response.data.courses.filter(course => course.instructor_id === user?.id);
+      setCourses(instructorCourses || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
     } finally {
       setLoading(false);
     }
@@ -101,9 +122,10 @@ const CertificateGenerator = () => {
 
   if (loading) return <Typography>Loading certificates...</Typography>;
 
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>My Certificates</Typography>
+  if (user?.role === 'student') {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>My Certificates</Typography>
       
       <Card>
         <CardContent>
@@ -143,7 +165,7 @@ const CertificateGenerator = () => {
                 )) : (
                   <TableRow>
                     <TableCell colSpan={4} align="center">
-                      No completed courses found. Complete a course to earn certificates!
+                      No completed free courses found. Complete a free course to earn certificates!
                     </TableCell>
                   </TableRow>
                 )}
@@ -214,6 +236,65 @@ const CertificateGenerator = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      </Box>
+    );
+  }
+
+  // Instructor/Admin view
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        {user?.role === 'admin' ? 'Certificate Management' : 'Student Certificates'}
+      </Typography>
+      
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            {user?.role === 'admin' ? 'All Courses' : 'My Courses'}
+          </Typography>
+          
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Course</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Students Enrolled</TableCell>
+                  <TableCell>Completed Students</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {courses.length > 0 ? courses.map((course) => (
+                  <TableRow key={course.id}>
+                    <TableCell>{course.title}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={course.price === 0 ? 'Free' : 'Paid'} 
+                        color={course.price === 0 ? 'success' : 'primary'} 
+                      />
+                    </TableCell>
+                    <TableCell>{course.enrolled_count || 0}</TableCell>
+                    <TableCell>{course.completed_count || 0}</TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      No courses found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          
+          <Box sx={{ mt: 3, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
+            <Typography variant="body2" color="info.contrastText">
+              Note: Only students who complete free courses can generate certificates. 
+              Paid course certificates require manual verification.
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

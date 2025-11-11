@@ -116,6 +116,13 @@ const Navbar = ({ user, onLogout }) => {
                   >
                     Create Course
                   </Button>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/certificates')}
+                    sx={{ bgcolor: activeTab === '/certificates' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
+                    Certificates
+                  </Button>
                 </>
               )}
               {user.role === 'admin' && (
@@ -133,6 +140,13 @@ const Navbar = ({ user, onLogout }) => {
                     sx={{ bgcolor: activeTab === '/admin/courses' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
                   >
                     Manage Courses
+                  </Button>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/certificates')}
+                    sx={{ bgcolor: activeTab === '/certificates' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
+                    Certificates
                   </Button>
                 </>
               )}
