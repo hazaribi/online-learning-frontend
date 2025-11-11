@@ -6,7 +6,7 @@ import {
   DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import { Download, EmojiEvents } from '@mui/icons-material';
-import { enrollmentAPI, courseAPI } from '../../services/api';
+import { enrollmentAPI, coursesAPI } from '../../services/api';
 
 const CertificateGenerator = ({ user }) => {
   const [enrollments, setEnrollments] = useState([]);
@@ -41,7 +41,7 @@ const CertificateGenerator = ({ user }) => {
 
   const fetchInstructorCourses = async () => {
     try {
-      const response = await courseAPI.getAll();
+      const response = await coursesAPI.getAll();
       const instructorCourses = user?.role === 'admin' ? 
         response.data.courses : 
         response.data.courses.filter(course => course.instructor_id === user?.id);
