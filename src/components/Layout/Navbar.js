@@ -21,6 +21,8 @@ const Navbar = ({ user, onLogout }) => {
       newActiveTab = '/my-courses';
     } else if (currentPath.startsWith('/my-stats') || currentPath.startsWith('/progress/')) {
       newActiveTab = '/my-stats';
+    } else if (currentPath.startsWith('/certificates')) {
+      newActiveTab = '/certificates';
     } else if (currentPath.startsWith('/courses') || currentPath.startsWith('/course/')) {
       newActiveTab = '/courses';
     } else if (currentPath.startsWith('/admin/courses') || currentPath.startsWith('/admin/create-course') || currentPath.startsWith('/admin/edit-course')) {
@@ -88,6 +90,13 @@ const Navbar = ({ user, onLogout }) => {
                     sx={{ bgcolor: activeTab === '/my-stats' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
                   >
                     My Progress
+                  </Button>
+                  <Button 
+                    color="inherit" 
+                    onClick={() => handleNavigation('/certificates')}
+                    sx={{ bgcolor: activeTab === '/certificates' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+                  >
+                    Certificates
                   </Button>
                 </>
               )}

@@ -20,6 +20,7 @@ import PaymentSuccess from './components/Payment/PaymentSuccess';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import AdminCourseManagement from './components/Admin/AdminCourseManagement';
 import AdminCreateCourse from './components/Admin/AdminCreateCourse';
+import CertificateGenerator from './components/Certificates/CertificateGenerator';
 import ProgressPage from './components/Progress/ProgressPage';
 
 const theme = createTheme({
@@ -139,6 +140,10 @@ function AppContent() {
               <Route 
                 path="/my-stats" 
                 element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><UserStats userId={user.id} /></Container> : <Navigate to="/login" />} 
+              />
+              <Route 
+                path="/certificates" 
+                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><CertificateGenerator /></Container> : <Navigate to="/login" />} 
               />
           </Routes>
         </Box>

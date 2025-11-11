@@ -17,9 +17,20 @@ const UserStats = ({ userId }) => {
   const fetchStats = async () => {
     try {
       const response = await progressAPI.getStats(userId);
+      console.log('User stats response:', response.data);
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
+      // Set default stats if API fails
+      setStats({
+        total_courses: 0,
+        completed_courses: 0,
+        completion_rate: 0,
+        total_quizzes: 0,
+        quiz_pass_rate: 0,
+        average_score: 0,
+        enrollments: []
+      });
     } finally {
       setLoading(false);
     }
@@ -99,7 +110,7 @@ const UserStats = ({ userId }) => {
           <Typography variant="h6" gutterBottom>Course Progress</Typography>
           
           <List>
-            {stats.enrollments.map((enrollment) => (
+            {stats.enrollments && stats.enrollments.length > 0 ? stats.enrollments.map((enrollment) => (
               <ListItem key={enrollment.course_id}>
                 <ListItemText
                   primary={
@@ -130,7 +141,14 @@ const UserStats = ({ userId }) => {
                   }
                 />
               </ListItem>
-            ))}
+            )) : (
+              <ListItem>
+                <ListItemText
+                  primary="No enrolled courses found"
+                  secondary="Enroll in courses to see your progress here"
+                />
+              </ListItem>
+            )}
           </List>
         </CardContent>
       </Card>
