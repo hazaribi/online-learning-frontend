@@ -28,11 +28,22 @@ const CertificateGenerator = ({ user }) => {
   const fetchCompletedEnrollments = async () => {
     try {
       const response = await enrollmentAPI.getMyCourses();
-      const completedEnrollments = (response.data.enrollments || []).filter(
+      console.log('All enrollments:', response.data.enrollments);
+      
+      const allEnrollments = response.data.enrollments || [];
+      console.log('Filtering enrollments for certificates...');
+      
+      allEnrollments.forEach(enrollment => {
+        console.log(`Course: ${enrollment.course?.title}, Progress: ${enrollment.progress}, Completed: ${enrollment.completed_at}, Price: ${enrollment.course?.price}`);
+      });
+      
+      const completedEnrollments = allEnrollments.filter(
         enrollment => enrollment.progress === 100 && 
                      enrollment.completed_at && 
                      enrollment.course?.price === 0
       );
+      
+      console.log('Filtered completed free courses:', completedEnrollments);
       setEnrollments(completedEnrollments);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
