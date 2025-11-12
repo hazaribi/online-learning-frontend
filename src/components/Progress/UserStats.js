@@ -6,19 +6,29 @@ import {
 import { School, Quiz, TrendingUp, CheckCircle } from '@mui/icons-material';
 import { progressAPI, enrollmentAPI } from '../../services/api';
 
-const UserStats = ({ userId }) => {
+const UserStats = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
-  }, [userId]);
+  }, []);
 
   const fetchStats = async () => {
     try {
-      console.log('Fetching stats for userId:', userId);
-      const response = await progressAPI.getStats(userId);
-      console.log('User stats response:', response.data);
+      // Get user ID from token - backend will extract it
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/progress/stats/me`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('User stats response:', data);
       
       // Also try to get enrollment data as fallback
       try {
@@ -33,9 +43,9 @@ const UserStats = ({ userId }) => {
           console.log('Enrollment data:', enrollmentData);
           
           // If progress API returns empty but we have enrollments, use enrollment data
-          if ((!response.data.enrollments || response.data.enrollments.length === 0) && enrollmentData.enrollments) {
+          if ((!data.enrollments || data.enrollments.length === 0) && enrollmentData.enrollments) {
             const enrichedStats = {
-              ...response.data,
+              ...data,
               total_courses: enrollmentData.enrollments.length,
               completed_courses: enrollmentData.enrollments.filter(e => e.completed_at).length,
               enrollments: enrollmentData.enrollments
@@ -48,7 +58,7 @@ const UserStats = ({ userId }) => {
         console.error('Error fetching enrollment data:', enrollmentError);
       }
       
-      setStats(response.data);
+      setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
       // Set default stats if API fails

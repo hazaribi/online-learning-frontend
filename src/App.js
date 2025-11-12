@@ -139,7 +139,7 @@ function AppContent() {
               />
               <Route 
                 path="/my-stats" 
-                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><UserStats userId={user.id} /></Container> : <Navigate to="/login" />} 
+                element={user ? <Container maxWidth="lg" sx={{ py: 2 }}><UserStats /></Container> : <Navigate to="/login" />} 
               />
               <Route 
                 path="/certificates" 
