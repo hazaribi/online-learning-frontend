@@ -16,52 +16,49 @@ const UserStats = () => {
 
   const fetchStats = async () => {
     try {
-      // Get user ID from token - backend will extract it
+      console.log('Token:', localStorage.getItem('token') ? 'Present' : 'Missing');
+      
+      // Try the stats/me endpoint first
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/progress/stats/me`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('Stats response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Stats data:', data);
+        setStats(data);
+        return;
       }
       
-      const data = await response.json();
-      console.log('User stats response:', data);
+      // If stats endpoint fails, fall back to enrollment data
+      console.log('Stats endpoint failed, using enrollment data');
+      const enrollmentResponse = await enrollmentAPI.getMyCourses();
+      console.log('Enrollment response:', enrollmentResponse.data);
       
-      // Also try to get enrollment data as fallback
-      try {
-        const enrollmentResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/enrollment/my-courses`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        if (enrollmentResponse.ok) {
-          const enrollmentData = await enrollmentResponse.json();
-          console.log('Enrollment data:', enrollmentData);
-          
-          // If progress API returns empty but we have enrollments, use enrollment data
-          if ((!data.enrollments || data.enrollments.length === 0) && enrollmentData.enrollments) {
-            const enrichedStats = {
-              ...data,
-              total_courses: enrollmentData.enrollments.length,
-              completed_courses: enrollmentData.enrollments.filter(e => e.completed_at).length,
-              enrollments: enrollmentData.enrollments
-            };
-            setStats(enrichedStats);
-            return;
-          }
-        }
-      } catch (enrollmentError) {
-        console.error('Error fetching enrollment data:', enrollmentError);
-      }
+      const enrollments = enrollmentResponse.data.enrollments || [];
+      const totalCourses = enrollments.length;
+      const completedCourses = enrollments.filter(e => e.completed_at).length;
+      const completionRate = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
       
-      setStats(data);
+      const stats = {
+        total_courses: totalCourses,
+        completed_courses: completedCourses,
+        completion_rate: completionRate,
+        total_quizzes: 0,
+        quiz_pass_rate: 0,
+        average_score: 0,
+        enrollments: enrollments
+      };
+      
+      console.log('Calculated stats from enrollment:', stats);
+      setStats(stats);
     } catch (error) {
       console.error('Error fetching stats:', error);
-      // Set default stats if API fails
       setStats({
         total_courses: 0,
         completed_courses: 0,
