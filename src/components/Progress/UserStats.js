@@ -4,7 +4,7 @@ import {
   List, ListItem, ListItemText, LinearProgress, Chip
 } from '@mui/material';
 import { School, Quiz, TrendingUp, CheckCircle } from '@mui/icons-material';
-import { progressAPI } from '../../services/api';
+import { progressAPI, enrollmentAPI } from '../../services/api';
 
 const UserStats = ({ userId }) => {
   const [stats, setStats] = useState(null);
@@ -16,8 +16,38 @@ const UserStats = ({ userId }) => {
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching stats for userId:', userId);
       const response = await progressAPI.getStats(userId);
       console.log('User stats response:', response.data);
+      
+      // Also try to get enrollment data as fallback
+      try {
+        const enrollmentResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/enrollment/my-courses`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (enrollmentResponse.ok) {
+          const enrollmentData = await enrollmentResponse.json();
+          console.log('Enrollment data:', enrollmentData);
+          
+          // If progress API returns empty but we have enrollments, use enrollment data
+          if ((!response.data.enrollments || response.data.enrollments.length === 0) && enrollmentData.enrollments) {
+            const enrichedStats = {
+              ...response.data,
+              total_courses: enrollmentData.enrollments.length,
+              completed_courses: enrollmentData.enrollments.filter(e => e.completed_at).length,
+              enrollments: enrollmentData.enrollments
+            };
+            setStats(enrichedStats);
+            return;
+          }
+        }
+      } catch (enrollmentError) {
+        console.error('Error fetching enrollment data:', enrollmentError);
+      }
+      
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
