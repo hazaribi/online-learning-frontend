@@ -37,11 +37,35 @@ const CertificateGenerator = ({ user }) => {
         console.log(`Course: ${enrollment.course?.title}, Progress: ${enrollment.progress}, Completed: ${enrollment.completed_at}, Price: ${enrollment.course?.price}`);
       });
       
-      const completedEnrollments = allEnrollments.filter(
-        enrollment => enrollment.progress === 100 && 
-                     enrollment.completed_at && 
-                     enrollment.course?.price === 0
-      );
+      // For completed courses, check if they are free courses
+      const completedEnrollments = [];
+      
+      for (const enrollment of allEnrollments) {
+        if (enrollment.progress === 100 && enrollment.completed_at) {
+          // If price is undefined, fetch course details to check if it's free
+          if (enrollment.course?.price === undefined) {
+            try {
+              const courseResponse = await coursesAPI.getById(enrollment.course_id);
+              const coursePrice = courseResponse.data.course?.price || 0;
+              console.log(`Fetched price for ${enrollment.course?.title}: ${coursePrice}`);
+              
+              if (coursePrice === 0) {
+                completedEnrollments.push({
+                  ...enrollment,
+                  course: {
+                    ...enrollment.course,
+                    price: coursePrice
+                  }
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching course price:', error);
+            }
+          } else if (enrollment.course?.price === 0) {
+            completedEnrollments.push(enrollment);
+          }
+        }
+      }
       
       console.log('Filtered completed free courses:', completedEnrollments);
       setEnrollments(completedEnrollments);
