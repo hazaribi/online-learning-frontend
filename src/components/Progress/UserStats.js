@@ -45,13 +45,41 @@ const UserStats = () => {
       const completedCourses = enrollments.filter(e => e.completed_at).length;
       const completionRate = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
       
+      // Try to get quiz data
+      let totalQuizzes = 0;
+      let averageScore = 0;
+      let quizPassRate = 0;
+      
+      try {
+        const quizResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/quiz/my-attempts`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (quizResponse.ok) {
+          const quizData = await quizResponse.json();
+          const attempts = quizData.attempts || [];
+          totalQuizzes = attempts.length;
+          
+          if (attempts.length > 0) {
+            const totalScore = attempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
+            averageScore = Math.round(totalScore / attempts.length);
+            const passedQuizzes = attempts.filter(attempt => attempt.passed).length;
+            quizPassRate = Math.round((passedQuizzes / attempts.length) * 100);
+          }
+        }
+      } catch (quizError) {
+        console.log('Quiz data not available:', quizError.message);
+      }
+      
       const stats = {
         total_courses: totalCourses,
         completed_courses: completedCourses,
         completion_rate: completionRate,
-        total_quizzes: 0,
-        quiz_pass_rate: 0,
-        average_score: 0,
+        total_quizzes: totalQuizzes,
+        quiz_pass_rate: quizPassRate,
+        average_score: averageScore,
         enrollments: enrollments
       };
       
