@@ -326,7 +326,6 @@ const CertificateGenerator = ({ user }) => {
                           variant="outlined"
                           size="small"
                           onClick={() => viewCompletedStudents(course)}
-                          disabled={course.price !== 0}
                         >
                           View Completed Students
                         </Button>
@@ -404,8 +403,7 @@ const CertificateGenerator = ({ user }) => {
           
           <Box sx={{ mt: 3, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
             <Typography variant="body2" color="info.contrastText">
-              Note: You can only generate certificates for students who completed free courses. 
-              Click "View Completed Students" to see eligible students.
+              Click "View Completed Students" to see students who completed each course and generate certificates for them.
             </Typography>
           </Box>
         </CardContent>
