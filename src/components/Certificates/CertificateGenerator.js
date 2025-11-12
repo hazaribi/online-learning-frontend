@@ -11,6 +11,8 @@ import { enrollmentAPI, coursesAPI } from '../../services/api';
 const CertificateGenerator = ({ user }) => {
   const [enrollments, setEnrollments] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [completedStudents, setCompletedStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [certificateDialog, setCertificateDialog] = useState({ open: false, enrollment: null });
   const [studentName, setStudentName] = useState('');
@@ -53,6 +55,45 @@ const CertificateGenerator = ({ user }) => {
     }
   };
 
+  const fetchCompletedStudents = async (courseId) => {
+    try {
+      setLoading(true);
+      // This would need a backend endpoint to get completed students for a course
+      // For now, using mock data structure
+      const mockCompletedStudents = [
+        {
+          id: 1,
+          student_name: 'John Doe',
+          student_email: 'john@example.com',
+          completed_at: '2024-01-15',
+          progress: 100,
+          course: courses.find(c => c.id === courseId)
+        }
+      ];
+      setCompletedStudents(mockCompletedStudents);
+    } catch (error) {
+      console.error('Error fetching completed students:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const viewCompletedStudents = (course) => {
+    setSelectedCourse(course);
+    fetchCompletedStudents(course.id);
+  };
+
+  const generateStudentCertificate = (student) => {
+    setStudentName(student.student_name);
+    setCertificateDialog({ 
+      open: true, 
+      enrollment: {
+        ...student,
+        course: selectedCourse
+      }
+    });
+  };
+
   const generateCertificate = (enrollment) => {
     setStudentName('');
     setCertificateDialog({ open: true, enrollment });
@@ -60,7 +101,7 @@ const CertificateGenerator = ({ user }) => {
 
   const downloadCertificate = (enrollment) => {
     if (!studentName.trim()) {
-      alert('Please enter your name for the certificate');
+      alert('Please enter the student name for the certificate');
       return;
     }
 
@@ -118,6 +159,9 @@ const CertificateGenerator = ({ user }) => {
 
     setCertificateDialog({ open: false, enrollment: null });
     setStudentName('');
+    if (selectedCourse) {
+      setSelectedCourse(null);
+    }
   };
 
   if (loading) return <Typography>Loading certificates...</Typography>;
@@ -186,11 +230,12 @@ const CertificateGenerator = ({ user }) => {
         <DialogContent>
           <TextField
             fullWidth
-            label="Enter your name for the certificate"
+            label={user?.role === 'student' ? 'Enter your name for the certificate' : 'Enter student name for the certificate'}
             value={studentName}
             onChange={(e) => setStudentName(e.target.value)}
             sx={{ mb: 3 }}
             placeholder="e.g., John Doe"
+            disabled={user?.role !== 'student'}
           />
           <Box sx={{ 
             textAlign: 'center', 
@@ -253,48 +298,182 @@ const CertificateGenerator = ({ user }) => {
             {user?.role === 'admin' ? 'All Courses' : 'My Courses'}
           </Typography>
           
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Course</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Students Enrolled</TableCell>
-                  <TableCell>Completed Students</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {courses.length > 0 ? courses.map((course) => (
-                  <TableRow key={course.id}>
-                    <TableCell>{course.title}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={course.price === 0 ? 'Free' : 'Paid'} 
-                        color={course.price === 0 ? 'success' : 'primary'} 
-                      />
-                    </TableCell>
-                    <TableCell>{course.enrolled_count || 0}</TableCell>
-                    <TableCell>{course.completed_count || 0}</TableCell>
-                  </TableRow>
-                )) : (
+          {!selectedCourse ? (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
-                      No courses found.
-                    </TableCell>
+                    <TableCell>Course</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Students Enrolled</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {courses.length > 0 ? courses.map((course) => (
+                    <TableRow key={course.id}>
+                      <TableCell>{course.title}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={course.price === 0 ? 'Free' : 'Paid'} 
+                          color={course.price === 0 ? 'success' : 'primary'} 
+                        />
+                      </TableCell>
+                      <TableCell>{course.enrolled_count || 0}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => viewCompletedStudents(course)}
+                          disabled={course.price !== 0}
+                        >
+                          View Completed Students
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No courses found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <>
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => setSelectedCourse(null)}
+                >
+                  ← Back to Courses
+                </Button>
+                <Typography variant="h6">
+                  Completed Students - {selectedCourse.title}
+                </Typography>
+              </Box>
+              
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Student Name</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Completed Date</TableCell>
+                      <TableCell>Score</TableCell>
+                      <TableCell>Certificate</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {completedStudents.length > 0 ? completedStudents.map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell>{student.student_name}</TableCell>
+                        <TableCell>{student.student_email}</TableCell>
+                        <TableCell>
+                          {new Date(student.completed_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={`${student.progress}%`} color="success" />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outlined"
+                            startIcon={<EmojiEvents />}
+                            onClick={() => generateStudentCertificate(student)}
+                            size="small"
+                          >
+                            Generate Certificate
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center">
+                          No completed students found for this course.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          )}
           
           <Box sx={{ mt: 3, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
             <Typography variant="body2" color="info.contrastText">
-              Note: Only students who complete free courses can generate certificates. 
-              Paid course certificates require manual verification.
+              Note: You can only generate certificates for students who completed free courses. 
+              Click "View Completed Students" to see eligible students.
             </Typography>
           </Box>
         </CardContent>
       </Card>
+
+      {/* Certificate Preview Dialog for Instructor/Admin */}
+      <Dialog 
+        open={certificateDialog.open} 
+        onClose={() => setCertificateDialog({ open: false, enrollment: null })}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Generate Certificate for Student</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Student name for the certificate"
+            value={studentName}
+            onChange={(e) => setStudentName(e.target.value)}
+            sx={{ mb: 3 }}
+            placeholder="e.g., John Doe"
+          />
+          <Box sx={{ 
+            textAlign: 'center', 
+            p: 4, 
+            border: '3px solid #1976d2',
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+          }}>
+            <Typography variant="h3" color="primary" gutterBottom>
+              Certificate of Completion
+            </Typography>
+            <Typography variant="h6" sx={{ my: 2 }}>
+              This is to certify that
+            </Typography>
+            <Typography variant="h4" sx={{ my: 2, color: '#333', textDecoration: 'underline' }}>
+              {studentName || '[Student Name]'}
+            </Typography>
+            <Typography variant="h6" sx={{ my: 2 }}>
+              has successfully completed
+            </Typography>
+            <Typography variant="h4" color="primary" sx={{ my: 3, fontWeight: 'bold' }}>
+              {certificateDialog.enrollment?.course?.title || 'Course Title'}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 4 }}>
+              Completion Date: {certificateDialog.enrollment?.completed_at ? 
+                new Date(certificateDialog.enrollment.completed_at).toLocaleDateString() : 'N/A'}
+            </Typography>
+            <Typography variant="body1">
+              Final Score: {certificateDialog.enrollment?.progress || 0}%
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setCertificateDialog({ open: false, enrollment: null });
+            setStudentName('');
+          }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => downloadCertificate(certificateDialog.enrollment)}
+            variant="contained"
+            startIcon={<Download />}
+          >
+            Download Certificate
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
