@@ -58,21 +58,22 @@ const CertificateGenerator = ({ user }) => {
   const fetchCompletedStudents = async (courseId) => {
     try {
       setLoading(true);
-      // This would need a backend endpoint to get completed students for a course
-      // For now, using mock data structure
-      const mockCompletedStudents = [
-        {
-          id: 1,
-          student_name: 'John Doe',
-          student_email: 'john@example.com',
-          completed_at: '2024-01-15',
-          progress: 100,
-          course: courses.find(c => c.id === courseId)
+      const response = await coursesAPI.getById(courseId);
+      const completedResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/courses/${courseId}/completed-students`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-      ];
-      setCompletedStudents(mockCompletedStudents);
+      });
+      
+      if (completedResponse.ok) {
+        const data = await completedResponse.json();
+        setCompletedStudents(data.completedStudents || []);
+      } else {
+        setCompletedStudents([]);
+      }
     } catch (error) {
       console.error('Error fetching completed students:', error);
+      setCompletedStudents([]);
     } finally {
       setLoading(false);
     }
